@@ -2,16 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-
 .large-wallet > .wallet-adapter-dropdown {
     width: 100% !important;
 }
 
 .large-wallet > .wallet-adapter-dropdown > .wallet-adapter-button {
-    width: 100% !important;
+    position: absolute !important;
+    top: 0 !important;
+    bottom: 0 !important;
     background-color: transparent !important;
-    height: 60px !important;
-    @apply ring-black/10 ring-[0.5px] !text-gray-900 !text-xs whitespace-nowrap hover:!bg-zinc-100 transition !rounded-3xl lg:text-sm font-semibold !w-full lg:w-min justify-center items-center
+    z-index: 999;
+    right: 0; left: 0;
+    height: 140px !important;
+    opacity: 0 !important;
 }
 
 .small-wallet > .wallet-adapter-dropdown > .wallet-adapter-button {
@@ -24,7 +27,6 @@
     background-color: transparent !important;
     @apply h-4 w-4
 }
-
 
 .wallet-adapter-button {
     background-color: transparent;

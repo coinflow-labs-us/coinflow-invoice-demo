@@ -1,20 +1,25 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
+import { copyTextToClipboard } from "../../utils/helpers.ts";
 
 export default function SuccessModal({
-  isOpen,
+  signature,
   setIsOpen,
+  invoice,
 }: {
-  isOpen: boolean;
-  setIsOpen: (o: boolean) => void;
+  signature: string | null;
+  setIsOpen: (s: string | null) => void;
+  invoice: string;
 }) {
+  const text = `Invoice:\n${invoice}\n\nTransaction signature:\n${signature}\n\n`;
+
   return (
     <>
-      <Transition appear show={isOpen} as={Fragment}>
+      <Transition appear show={Boolean(signature)} as={Fragment}>
         <Dialog
           as="div"
           className="relative z-50"
-          onClose={() => setIsOpen(false)}
+          onClose={() => setIsOpen(null)}
         >
           <Transition.Child
             as={Fragment}
@@ -39,33 +44,39 @@ export default function SuccessModal({
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-3xl bg-white p-8 text-left align-middle shadow-xl transition-all">
+                <Dialog.Panel className="w-full space-y-4 max-w-md transform overflow-hidden rounded-3xl bg-white p-5 text-left align-middle shadow-xl transition-all">
                   <Dialog.Title
                     as="h3"
-                    className="text-lg lg:text-xl font-bold leading-6 text-gray-900"
+                    className="text-lg lg:text-xl font-bold leading-6 text-gray-900 px-3"
                   >
-                    ❤️ Thank you! 🇮🇱
+                    Payment complete
                   </Dialog.Title>
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-500 font-medium mb-5">
-                      Your donation is complete. Thank you!
-                    </p>
-                  </div>
-
-                  <div
-                    className={
-                      "bg-blue-600 rounded-2xl p-4 px-6 hover:bg-blue-500 transition cursor-pointer w-min"
-                    }
-                    onClick={() => setIsOpen(false)}
+                  <button
+                    onClick={() => copyTextToClipboard(text)}
+                    className="flex flex-col bg-gray-100 w-full rounded-xl p-3 relative outline-none"
                   >
-                    <span
+                    <p className="text-xs text-gray-500 font-medium">
+                      Invoice #
+                    </p>
+                    <p className="text-sm text-gray-800 font-medium mb-3">
+                      {invoice}
+                    </p>
+                    <p className="text-xs text-gray-500 font-medium">
+                      Transaction signature
+                    </p>
+                    <p className="text-sm text-gray-800 font-medium">
+                      {signature}
+                    </p>
+                    <i
                       className={
-                        "text-sm font-semibold text-white whitespace-nowrap"
+                        "bx bx-copy-alt text-gray-600 hover:text-indigo-500 transition absolute right-3 top-3"
                       }
-                    >
-                      Donate again
-                    </span>
-                  </div>
+                    />
+                  </button>
+                  <p className="text-sm text-gray-700 font-medium mb-5 px-3">
+                    Please send this signature and invoice number to{" "}
+                    <b className={"text-indigo-600"}>accounting@triton.com</b>
+                  </p>
                 </Dialog.Panel>
               </Transition.Child>
             </div>

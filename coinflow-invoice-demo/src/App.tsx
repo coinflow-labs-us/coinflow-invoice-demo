@@ -6,6 +6,7 @@ import { WalletProvider } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { WalletContextProvider } from "./wallet/Wallet.tsx";
 import { InvoiceContextProvider } from "./context/InvoiceContext.tsx";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -13,10 +14,13 @@ function App() {
       <WalletModalProvider>
         <WalletContextProvider>
           <div className={"flex flex-1 h-screen w-screen relative"}>
+            <Toaster />
             <div className={"grid grid-cols-2 h-full w-full"}>
               <BrandCover />
               <InvoiceContextProvider>
-                <div className={"bg-white p-8 md:p-12 lg:p-28"}>
+                <div
+                  className={"bg-white p-8 md:p-12 lg:p-28 w-full max-w-full"}
+                >
                   <InvoiceForm />
                   <CoinflowForm />
                 </div>

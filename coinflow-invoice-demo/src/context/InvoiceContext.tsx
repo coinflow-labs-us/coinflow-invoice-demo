@@ -1,4 +1,10 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useState,
+} from "react";
 
 export interface InvoiceContextProps {
   email: string;
@@ -10,6 +16,7 @@ export interface InvoiceContextProps {
   formError: FormError | null;
   setFormError: (e: FormError | null) => void;
   validateInvoiceForm: () => boolean;
+  formIsComplete: () => boolean;
 }
 
 export const InvoiceContext = createContext<InvoiceContextProps>({
@@ -22,6 +29,9 @@ export const InvoiceContext = createContext<InvoiceContextProps>({
   setFormError(): void {},
   setInvoice(): void {},
   validateInvoiceForm(): boolean {
+    return false;
+  },
+  formIsComplete(): boolean {
     return false;
   },
 });
@@ -43,31 +53,31 @@ export function InvoiceContextProvider({ children }: { children: ReactNode }) {
   /**
    * Validate email with regex
    */
-  function isValidEmail() {
+  const isValidEmail = useCallback(() => {
     const regex =
       // eslint-disable-next-line
       /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
     return !(!email || !regex.test(email.toLowerCase()));
-  }
+  }, [email]);
 
   /**
    * Validate amount as a number
    */
-  function isValidAmount() {
+  const isValidAmount = useCallback(() => {
     return !(!amount || isNaN(Number(amount)));
-  }
+  }, [amount]);
 
   /**
    * Validate invoice number is structured correctly
    */
-  function isValidInvoiceNumber() {
+  const isValidInvoiceNumber = useCallback(() => {
     return invoice.includes("INV-");
-  }
+  }, [invoice]);
 
   /**
    * Validate email, amount and invoice number before opening Coinflow payment form
    */
-  function validateInvoiceForm() {
+  const validateInvoiceForm = useCallback(() => {
     if (!isValidAmount()) {
       setFormError({
         type: ErrorType.Amount,
@@ -93,7 +103,16 @@ export function InvoiceContextProvider({ children }: { children: ReactNode }) {
     }
 
     return true;
-  }
+  }, [isValidAmount, isValidEmail, isValidInvoiceNumber]);
+
+  /**
+   * Validate email, amount and invoice number before opening Coinflow payment form
+   */
+  const formIsComplete = useCallback(() => {
+    if (!isValidAmount()) return false;
+    if (!isValidEmail()) return false;
+    return isValidInvoiceNumber();
+  }, [isValidAmount, isValidEmail, isValidInvoiceNumber]);
 
   return (
     <InvoiceContext.Provider
@@ -107,6 +126,7 @@ export function InvoiceContextProvider({ children }: { children: ReactNode }) {
         formError,
         setFormError,
         validateInvoiceForm,
+        formIsComplete,
       }}
     >
       {children}

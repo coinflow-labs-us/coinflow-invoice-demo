@@ -72,6 +72,7 @@ export function WalletContextProvider({ children }: { children: ReactNode }) {
   const sendTransaction = useCallback(
     async (transaction: Transaction) => {
       if (wallet.publicKey && wallet.signTransaction) {
+        console.log("SENDING!!!", transaction);
         await wallet.signTransaction(transaction);
         return await wallet.sendTransaction(transaction, SOLANA_CONNECTION);
       }
