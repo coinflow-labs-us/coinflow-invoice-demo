@@ -187,12 +187,10 @@ function UsdcButton({
     if (!wallet.publicKey || !amount || isNaN(Number(amount))) return undefined;
     const usdc = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
     const source = getAssociatedTokenAddressSync(usdc, wallet.publicKey);
-    const destination = getAssociatedTokenAddressSync(
-      usdc,
-      new PublicKey("DPvTNd3cYvQmfqgyHG2Xsy9HrAdw32CwSqruUnsFiRga"),
-    );
 
-    // const destination = new PublicKey("DBU35xiW5QG6AnE4MmS3x3nVhuWTeTWwWXjXeotHLgAb");
+    const destination = new PublicKey(
+      "DBU35xiW5QG6AnE4MmS3x3nVhuWTeTWwWXjXeotHLgAb",
+    );
 
     const toSend = Number(amount) * Math.pow(10, 6);
 
