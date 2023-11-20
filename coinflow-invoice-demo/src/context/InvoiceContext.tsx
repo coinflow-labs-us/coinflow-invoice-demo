@@ -1,10 +1,14 @@
 import {
   createContext,
   ReactNode,
+  RefObject,
   useCallback,
   useContext,
+  useRef,
   useState,
 } from "react";
+import toast from "react-hot-toast";
+import emailjs from "@emailjs/browser";
 
 export interface InvoiceContextProps {
   email: string;
@@ -17,9 +21,16 @@ export interface InvoiceContextProps {
   setFormError: (e: FormError | null) => void;
   validateInvoiceForm: () => boolean;
   formIsComplete: () => boolean;
+  form: RefObject<HTMLFormElement | undefined>;
+  sendEmail: () => void;
+  successSignature: string | null;
+  setSuccessSignature: (s: string | null) => void;
 }
 
 export const InvoiceContext = createContext<InvoiceContextProps>({
+  sendEmail(): void {},
+  // @ts-ignore
+  form: undefined,
   amount: "",
   setAmount(): void {},
   setEmail(): void {},
@@ -49,6 +60,9 @@ export function InvoiceContextProvider({ children }: { children: ReactNode }) {
   const [amount, setAmount] = useState<string>("");
   const [invoice, setInvoice] = useState<string>("");
   const [formError, setFormError] = useState<FormError | null>(null);
+  const [successSignature, setSuccessSignature] = useState<string | null>(null);
+
+  const form = useRef<HTMLFormElement | undefined>(null);
 
   /**
    * Validate email with regex
@@ -114,6 +128,31 @@ export function InvoiceContextProvider({ children }: { children: ReactNode }) {
     return isValidInvoiceNumber();
   }, [isValidAmount, isValidEmail, isValidInvoiceNumber]);
 
+  const sendEmail = useCallback(() => {
+    // Add some delay for state variable signature to sync
+    setTimeout(() => {
+      if (!form.current) {
+        toast.error("form object null...");
+        return;
+      }
+      emailjs
+        .sendForm(
+          "service_xf5mzix",
+          "template_keykciy",
+          form.current,
+          "IMYCo5CVNWBo_LjMF",
+        )
+        .then(
+          (result) => {
+            console.log(result.text);
+          },
+          (error) => {
+            console.log(error.text);
+          },
+        );
+    }, 5000);
+  }, []);
+
   return (
     <InvoiceContext.Provider
       value={{
@@ -127,6 +166,10 @@ export function InvoiceContextProvider({ children }: { children: ReactNode }) {
         setFormError,
         validateInvoiceForm,
         formIsComplete,
+        form,
+        sendEmail,
+        successSignature,
+        setSuccessSignature,
       }}
     >
       {children}

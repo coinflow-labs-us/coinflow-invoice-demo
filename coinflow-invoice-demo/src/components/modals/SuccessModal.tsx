@@ -122,24 +122,6 @@ export default function SuccessModal({
                       </>
                     )}
                   </button>
-                  {signature ? (
-                    <>
-                      <p className="text-sm text-gray-700 font-medium mb-5 px-3 mt-5">
-                        Please send this signature and invoice number to{" "}
-                        <b className={"text-indigo-600"}>
-                          accounting@triton.com
-                        </b>
-                      </p>
-                      <button
-                        onClick={() => copyTextToClipboard(text)}
-                        className={
-                          "bg-indigo-500 text-white rounded-3xl p-4 px-10 hover:bg-indigo-400 transition outline-none font-semibold text-sm"
-                        }
-                      >
-                        Copy
-                      </button>
-                    </>
-                  ) : null}
                 </Dialog.Panel>
               </Transition.Child>
             </div>

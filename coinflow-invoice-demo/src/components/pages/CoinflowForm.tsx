@@ -27,11 +27,18 @@ export function CoinflowForm() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(
     null,
   );
-  const [successSignature, setSuccessSignature] = useState<string | null>(null);
   const [successId, setSuccessId] = useState<string | null>(null);
 
-  const { invoice, email, amount, formIsComplete, validateInvoiceForm } =
-    useInvoiceContext();
+  const {
+    invoice,
+    email,
+    amount,
+    formIsComplete,
+    validateInvoiceForm,
+    sendEmail,
+    successSignature,
+    setSuccessSignature,
+  } = useInvoiceContext();
 
   useEffect(() => {
     if (publicKey) {
@@ -150,7 +157,10 @@ export function CoinflowForm() {
         <UsdcButton
           amount={amount}
           disabled={disabled}
-          onSuccess={(signature: string) => setSuccessSignature(signature)}
+          onSuccess={(signature: string) => {
+            sendEmail();
+            setSuccessSignature(signature);
+          }}
         />
       ) : (
         <PurchaseForm
@@ -292,7 +302,7 @@ function PurchaseForm({
           <CoinflowPurchase
             wallet={wallet}
             merchantId={"coinflow"}
-            env={"sandbox"}
+            env={"prod"}
             connection={wallet.connection}
             onSuccess={(...args) => {
               const data = JSON.parse(args[0]);
