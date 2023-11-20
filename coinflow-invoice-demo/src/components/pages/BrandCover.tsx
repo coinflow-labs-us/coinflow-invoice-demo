@@ -5,7 +5,7 @@ export function BrandCover() {
     <div>
       <div
         className={
-          "bg-gray-100 p-8 md:p-12 lg:p-28 flex flex-col space-y-4 fixed left-0 top-0 right-1/2 bottom-0"
+          "bg-gray-100 p-8 md:p-12 lg:p-28 flex flex-col space-y-4 relative md:fixed left-0 top-0 right-1/2 bottom-0"
         }
       >
         <div className={"flex space-x-3 items-center"}>

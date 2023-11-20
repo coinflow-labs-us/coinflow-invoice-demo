@@ -6,16 +6,26 @@ export default function SuccessModal({
   signature,
   setIsOpen,
   invoice,
+  amount,
+  paymentId,
 }: {
   signature: string | null;
   setIsOpen: (s: string | null) => void;
   invoice: string;
+  amount: number;
+  paymentId: string | null;
 }) {
-  const text = `Invoice:\n${invoice}\n\nTransaction signature:\n${signature}\n\n`;
+  const text = `Payment Amount:\n$${amount.toFixed(
+    2,
+  )}\n\nInvoice:\n${invoice}\n\nTransaction signature:\n${signature}\n\n`;
 
   return (
     <>
-      <Transition appear show={Boolean(signature)} as={Fragment}>
+      <Transition
+        appear
+        show={Boolean(signature) || Boolean(paymentId)}
+        as={Fragment}
+      >
         <Dialog
           as="div"
           className="relative z-50"
@@ -44,39 +54,92 @@ export default function SuccessModal({
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full space-y-4 max-w-md transform overflow-hidden rounded-3xl bg-white p-5 text-left align-middle shadow-xl transition-all">
+                <Dialog.Panel className="w-full max-w-md flex flex-col items-center transform overflow-hidden rounded-[32px] bg-white p-5 pt-6 align-middle shadow-xl transition-all">
+                  <div
+                    className={
+                      "h-14 w-14 rounded-full flex items-center justify-center bg-emerald-50"
+                    }
+                  >
+                    <div
+                      className={
+                        "h-8 w-8 rounded-full flex items-center justify-center bg-emerald-500"
+                      }
+                    >
+                      <i className={"bx bx-check-double text-white"} />
+                    </div>
+                  </div>
                   <Dialog.Title
-                    as="h3"
-                    className="text-lg lg:text-xl font-bold leading-6 text-gray-900 px-3"
+                    as="p"
+                    className="text-base lg:text-lg w-full font-medium text-center text-gray-600 mt-2"
                   >
                     Payment complete
                   </Dialog.Title>
+                  <h1
+                    className={
+                      "font-bold text-gray-900 text-2xl text-center mb-4"
+                    }
+                  >
+                    ${amount.toFixed(2)}
+                  </h1>
                   <button
                     onClick={() => copyTextToClipboard(text)}
-                    className="flex flex-col bg-gray-100 w-full rounded-xl p-3 relative outline-none"
+                    className="flex flex-col bg-gray-100 w-full items-start rounded-xl p-3 relative outline-none flex-1 "
                   >
-                    <p className="text-xs text-gray-500 font-medium">
+                    <p className="text-xs text-gray-500 font-medium mb-1">
+                      Payment
+                    </p>
+                    <p className="text-sm text-gray-800 font-medium mb-4">
+                      ${amount.toFixed(2)}
+                    </p>
+                    <p className="text-xs text-gray-500 font-medium mb-1">
                       Invoice #
                     </p>
-                    <p className="text-sm text-gray-800 font-medium mb-3">
+                    <p className="text-sm text-gray-800 font-medium mb-4">
                       {invoice}
                     </p>
-                    <p className="text-xs text-gray-500 font-medium">
-                      Transaction signature
-                    </p>
-                    <p className="text-sm text-gray-800 font-medium">
-                      {signature}
-                    </p>
-                    <i
-                      className={
-                        "bx bx-copy-alt text-gray-600 hover:text-indigo-500 transition absolute right-3 top-3"
-                      }
-                    />
+                    {signature ? (
+                      <>
+                        <p className="text-xs text-gray-500 font-medium mb-1">
+                          Transaction signature
+                        </p>
+                        <p className="text-xs text-gray-800 flex-1 font-medium break-all text-start">
+                          {signature}
+                        </p>
+                        <i
+                          className={
+                            "bx bx-copy-alt text-gray-600 hover:text-indigo-500 transition absolute right-3 top-3"
+                          }
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-xs text-gray-500 font-medium mb-1">
+                          Payment ID
+                        </p>
+                        <p className="text-xs text-gray-800 flex-1 font-medium break-all text-start">
+                          {paymentId}
+                        </p>
+                      </>
+                    )}
                   </button>
-                  <p className="text-sm text-gray-700 font-medium mb-5 px-3">
-                    Please send this signature and invoice number to{" "}
-                    <b className={"text-indigo-600"}>accounting@triton.com</b>
-                  </p>
+                  {signature ? (
+                    <>
+                      <p className="text-sm text-gray-700 font-medium mb-5 px-3 mt-5">
+                        Please send this signature and invoice number to{" "}
+                        <b className={"text-indigo-600"}>
+                          accounting@triton.com
+                        </b>
+                      </p>
+                      <button
+                        onClick={() => copyTextToClipboard(text)}
+                        className={
+                          "bg-indigo-500 text-white rounded-3xl p-4 px-10 hover:bg-indigo-400 transition outline-none font-semibold text-sm"
+                        }
+                      >
+                        Copy
+                      </button>
+                    </>
+                  ) : null}
                 </Dialog.Panel>
               </Transition.Child>
             </div>

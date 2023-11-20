@@ -4,7 +4,7 @@ import {
   createTransferCheckedInstruction,
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
-import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useLocalWallet } from "../../wallet/Wallet.tsx";
 import SuccessModal from "../modals/SuccessModal.tsx";
@@ -28,6 +28,7 @@ export function CoinflowForm() {
     null,
   );
   const [successSignature, setSuccessSignature] = useState<string | null>(null);
+  const [successId, setSuccessId] = useState<string | null>(null);
 
   const { invoice, email, amount, formIsComplete, validateInvoiceForm } =
     useInvoiceContext();
@@ -158,14 +159,16 @@ export function CoinflowForm() {
           amount={amount}
           isReady={paymentMethod === PaymentMethod.Card}
           setIsReady={() => setPaymentMethod(null)}
-          onSuccess={(signature: string) => setSuccessSignature(signature)}
+          onSuccess={(pId: string) => setSuccessId(pId)}
         />
       )}
 
       <SuccessModal
+        paymentId={successId}
         signature={successSignature}
         setIsOpen={() => setSuccessSignature(null)}
         invoice={invoice}
+        amount={Number(amount)}
       />
     </div>
   );
@@ -204,7 +207,8 @@ function UsdcButton({
     );
 
     const tx = new Transaction().add(ix);
-    tx.recentBlockhash = Keypair.generate().publicKey.toString();
+    // tx.recentBlockhash = Keypair.generate().publicKey.toString();
+
     tx.feePayer = wallet.publicKey;
     return tx;
   }, [amount, wallet.publicKey]);
@@ -260,7 +264,7 @@ function PurchaseForm({
   isReady: boolean;
   email: string;
   invoice: string;
-  onSuccess: (signature: string) => void;
+  onSuccess: (pId: string) => void;
 }) {
   const wallet = useLocalWallet();
 
@@ -288,13 +292,16 @@ function PurchaseForm({
           <CoinflowPurchase
             wallet={wallet}
             merchantId={"coinflow"}
-            env={"prod"}
+            env={"sandbox"}
             connection={wallet.connection}
-            onSuccess={(signature) => onSuccess(signature)}
+            onSuccess={(...args) => {
+              const data = JSON.parse(args[0]);
+              onSuccess(data.info.paymentId);
+            }}
             blockchain={"solana"}
             amount={Number(amount)}
             email={email}
-            webhookInfo={{ invoice }}
+            webhookInfo={{ invoice, amount, email }}
             loaderBackground={"#FFFFFF"}
             handleHeightChange={handleHeightChange}
             chargebackProtectionData={[

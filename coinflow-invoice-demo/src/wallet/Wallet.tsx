@@ -10,7 +10,6 @@ import {
 import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import { useLocalStorage } from "./useLocalStorage";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { SOLANA_CONNECTION } from "../main.tsx";
 
 export interface WalletContextProps {
   connected: boolean;
@@ -72,9 +71,11 @@ export function WalletContextProvider({ children }: { children: ReactNode }) {
   const sendTransaction = useCallback(
     async (transaction: Transaction) => {
       if (wallet.publicKey && wallet.signTransaction) {
-        console.log("SENDING!!!", transaction);
+        const latestBlockHash =
+          await connection.getLatestBlockhash("confirmed");
+        transaction.recentBlockhash = latestBlockHash.blockhash;
         await wallet.signTransaction(transaction);
-        return await wallet.sendTransaction(transaction, SOLANA_CONNECTION);
+        return await wallet.sendTransaction(transaction, connection);
       }
 
       if (!keypair) throw new Error("Keypair not found");

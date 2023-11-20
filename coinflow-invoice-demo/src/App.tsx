@@ -15,11 +15,11 @@ function App() {
         <WalletContextProvider>
           <div className={"flex flex-1 h-screen w-screen relative"}>
             <Toaster />
-            <div className={"grid grid-cols-2 h-full w-full"}>
+            <div className={"grid grid-cols-1 md:grid-cols-2 h-full w-full"}>
               <BrandCover />
               <InvoiceContextProvider>
                 <div
-                  className={"bg-white p-8 md:p-12 lg:p-28 w-full max-w-full"}
+                  className={"bg-white p-1 md:p-12 lg:p-28 w-full max-w-full"}
                 >
                   <InvoiceForm />
                   <CoinflowForm />
