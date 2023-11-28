@@ -14,6 +14,7 @@ import usdc from "../../assets/usdc-logo.png";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { truncateString } from "../../utils/helpers.ts";
 import toast from "react-hot-toast";
+import { createMemoInstruction } from "@solana/spl-memo";
 
 enum PaymentMethod {
   Card = "card",
@@ -155,6 +156,8 @@ export function CoinflowForm() {
 
       {paymentMethod === PaymentMethod.Crypto ? (
         <UsdcButton
+          email={email}
+          invoice={invoice}
           amount={amount}
           disabled={disabled}
           onSuccess={(signature: string) => {
@@ -185,10 +188,14 @@ export function CoinflowForm() {
 }
 
 function UsdcButton({
+  email,
+  invoice,
   amount,
   disabled,
   onSuccess,
 }: {
+  email: string;
+  invoice: string;
   amount: string;
   disabled: boolean;
   onSuccess: (signature: string) => void;
@@ -198,30 +205,39 @@ function UsdcButton({
 
   const transferTx = useMemo(() => {
     if (!wallet.publicKey || !amount || isNaN(Number(amount))) return undefined;
-    const usdc = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+
+    // Mainnet
+    // const usdc = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+
+    const usdc = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
     const source = getAssociatedTokenAddressSync(usdc, wallet.publicKey);
 
     const destination = new PublicKey(
-      "DBU35xiW5QG6AnE4MmS3x3nVhuWTeTWwWXjXeotHLgAb",
+      "FAC9vPRC5F46BAcsEr2A3jAxuCms569dS7wZuQuUDDgS",
     );
 
     const toSend = Number(amount) * Math.pow(10, 6);
 
-    const ix = createTransferCheckedInstruction(
-      source,
-      usdc,
-      destination,
-      wallet.publicKey,
-      toSend,
-      6,
+    const ixs = [];
+
+    ixs.push(
+      createTransferCheckedInstruction(
+        source,
+        usdc,
+        destination,
+        wallet.publicKey,
+        toSend,
+        6,
+      ),
     );
 
-    const tx = new Transaction().add(ix);
-    // tx.recentBlockhash = Keypair.generate().publicKey.toString();
+    ixs.push(createMemoInstruction(JSON.stringify({ invoice, email, amount })));
+
+    const tx = new Transaction().add(...ixs);
 
     tx.feePayer = wallet.publicKey;
     return tx;
-  }, [amount, wallet.publicKey]);
+  }, [amount, wallet.publicKey, invoice, email]);
 
   const { sendTransaction } = useLocalWallet();
 
@@ -301,8 +317,8 @@ function PurchaseForm({
         <div style={{ height: `${height}px` }} className={`w-full`}>
           <CoinflowPurchase
             wallet={wallet}
-            merchantId={"coinflow"}
-            env={"prod"}
+            merchantId={"triton"}
+            env={"sandbox"}
             connection={wallet.connection}
             onSuccess={(...args) => {
               const data = JSON.parse(args[0]);
