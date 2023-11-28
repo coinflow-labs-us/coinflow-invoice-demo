@@ -4,6 +4,7 @@ import {
   RefObject,
   useCallback,
   useContext,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -25,6 +26,7 @@ export interface InvoiceContextProps {
   sendEmail: () => void;
   successSignature: string | null;
   setSuccessSignature: (s: string | null) => void;
+  amountDisabled: boolean;
 }
 
 export const InvoiceContext = createContext<InvoiceContextProps>({
@@ -45,6 +47,7 @@ export const InvoiceContext = createContext<InvoiceContextProps>({
   formIsComplete(): boolean {
     return false;
   },
+  amountDisabled: false,
 });
 
 export enum ErrorType {
@@ -55,14 +58,24 @@ export enum ErrorType {
 
 export type FormError = { type: string; message: string };
 
-export function InvoiceContextProvider({ children }: { children: ReactNode }) {
+export function InvoiceContextProvider({
+  children,
+  urlAmount,
+}: {
+  children: ReactNode;
+  urlAmount: string | null;
+}) {
   const [email, setEmail] = useState<string>("");
-  const [amount, setAmount] = useState<string>("");
+  const [amount, setAmount] = useState<string>(urlAmount ?? "");
   const [invoice, setInvoice] = useState<string>("");
   const [formError, setFormError] = useState<FormError | null>(null);
   const [successSignature, setSuccessSignature] = useState<string | null>(null);
 
   const form = useRef<HTMLFormElement | undefined>(null);
+
+  const amountDisabled = useMemo(() => {
+    return Boolean(urlAmount);
+  }, [urlAmount]);
 
   /**
    * Validate email with regex
@@ -170,6 +183,7 @@ export function InvoiceContextProvider({ children }: { children: ReactNode }) {
         sendEmail,
         successSignature,
         setSuccessSignature,
+        amountDisabled,
       }}
     >
       {children}

@@ -9,10 +9,13 @@ import { InvoiceContextProvider } from "./context/InvoiceContext.tsx";
 import { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
 import emailjs from "@emailjs/browser";
+import { useSearchParams } from "react-router-dom";
 
 function App() {
   useEffect(() => emailjs.init("IMYCo5CVNWBo_LjMF"), []);
+  const [searchParams] = useSearchParams();
 
+  searchParams.get("amount");
   return (
     <WalletProvider wallets={[]} autoConnect>
       <WalletModalProvider>
@@ -21,7 +24,7 @@ function App() {
             <Toaster />
             <div className={"grid grid-cols-1 md:grid-cols-2 h-full w-full"}>
               <BrandCover />
-              <InvoiceContextProvider>
+              <InvoiceContextProvider urlAmount={searchParams.get("amount")}>
                 <PaymentPage />
               </InvoiceContextProvider>
             </div>

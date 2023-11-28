@@ -102,7 +102,7 @@ export function Input(props: Props) {
         name={name}
         className={`${icon ? "pl-14" : ""} ${
           showError ? "ring-red-500 ring-2" : "ring-gray-200 ring-[0.5px]"
-        } transition-all cursor-pointer outline-none hover:bg-gray-100 focus:ring-indigo-500 focus:ring-2 focus:outline-none text-title text-sm
+        } transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer outline-none hover:bg-gray-100 focus:ring-indigo-500 focus:ring-2 focus:outline-none text-title text-sm
           font-medium px-5 ${height || "h-14"} rounded-xl ${className}`}
         onKeyDown={(e) => {
           e.stopPropagation();

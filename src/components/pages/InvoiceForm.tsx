@@ -15,6 +15,7 @@ export function InvoiceForm() {
     setFormError,
     form,
     successSignature,
+    amountDisabled,
   } = useInvoiceContext();
 
   const { publicKey } = useWallet();
@@ -27,8 +28,9 @@ export function InvoiceForm() {
 
       <form className={"space-y-5"} ref={form as LegacyRef<HTMLFormElement>}>
         <Input
-          label={"Payment amount"}
+          label={"Payment amount ($)"}
           required
+          disabled={amountDisabled}
           name="total"
           placeholder={"$10"}
           value={amount}
