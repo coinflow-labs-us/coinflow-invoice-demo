@@ -62,7 +62,7 @@ export function WalletContextProvider({ children }: { children: ReactNode }) {
   const connected = useMemo(() => !!publicKey, [publicKey]);
 
   const connection = useMemo(() => {
-    return new Connection("https://api.devnet.solana.com", "confirmed");
+    return new Connection("https://api.mainnet-beta.solana.com", "confirmed");
   }, []);
 
   const sendTransaction = useCallback(

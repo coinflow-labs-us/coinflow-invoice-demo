@@ -207,9 +207,11 @@ function UsdcButton({
     if (!wallet.publicKey || !amount || isNaN(Number(amount))) return undefined;
 
     // Mainnet
-    // const usdc = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
+    const usdc = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
 
-    const usdc = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
+    // Devnet
+    // const usdc = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
+
     const source = getAssociatedTokenAddressSync(usdc, wallet.publicKey);
 
     const destination = new PublicKey(
@@ -318,7 +320,7 @@ function PurchaseForm({
           <CoinflowPurchase
             wallet={wallet}
             merchantId={"triton"}
-            env={"sandbox"}
+            env={"prod"}
             connection={wallet.connection}
             onSuccess={(...args) => {
               const data = JSON.parse(args[0]);
