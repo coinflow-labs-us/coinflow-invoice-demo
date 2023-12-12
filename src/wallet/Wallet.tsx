@@ -79,7 +79,7 @@ export function WalletContextProvider({ children }: { children: ReactNode }) {
       transaction.partialSign(keypair);
       return await connection.sendRawTransaction(transaction.serialize());
     },
-    [connection, keypair, wallet, wallet.signTransaction],
+    [connection, keypair, wallet],
   );
 
   return (

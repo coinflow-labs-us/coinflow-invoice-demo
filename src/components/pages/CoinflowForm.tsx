@@ -1,24 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import { CoinflowPurchase } from "@coinflowlabs/react";
-import {
-  createTransferCheckedInstruction,
-  getAssociatedTokenAddressSync,
-} from "@solana/spl-token";
-import { PublicKey, Transaction } from "@solana/web3.js";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useLocalWallet } from "../../wallet/Wallet.tsx";
 import SuccessModal from "../modals/SuccessModal.tsx";
 import { useInvoiceContext } from "../../context/InvoiceContext.tsx";
 import logo from "../../assets/LogoTextBlack.png";
-import usdc from "../../assets/usdc-logo.png";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { truncateString } from "../../utils/helpers.ts";
-import toast from "react-hot-toast";
-import { createMemoInstruction } from "@solana/spl-memo";
 
 enum PaymentMethod {
-  Card = "card",
-  Crypto = "crypto",
+  Guest = "guest",
+  Wallet = "wallet",
 }
 
 export function CoinflowForm() {
@@ -36,14 +28,13 @@ export function CoinflowForm() {
     amount,
     formIsComplete,
     validateInvoiceForm,
-    sendEmail,
     successSignature,
     setSuccessSignature,
   } = useInvoiceContext();
 
   useEffect(() => {
     if (publicKey) {
-      setPaymentMethod(PaymentMethod.Crypto);
+      setPaymentMethod(PaymentMethod.Wallet);
     } else {
       setPaymentMethod(null);
     }
@@ -57,41 +48,29 @@ export function CoinflowForm() {
 
   return (
     <div className={"flex-1 flex-col h-full flex w-full mt-5 space-y-2"}>
-      <label className={"text-sm font-medium text-title px-4"}>
-        Payment method
-      </label>
       <div className={"flex space-x-4 w-full px-4"}>
         <div
           onClick={() => {
             if (validateInvoiceForm()) {
-              setPaymentMethod(PaymentMethod.Card);
+              setPaymentMethod(PaymentMethod.Guest);
             }
           }}
           className={`group cursor-pointer items-center py-5 flex justify-center flex-col ${
-            paymentMethod === PaymentMethod.Card
+            paymentMethod === PaymentMethod.Guest
               ? "ring-2 ring-indigo-500"
               : "ring-[0.5px] ring-gray-200"
           } flex-1 rounded-2xl hover:bg-gray-50 transition`}
         >
-          <div className={"flex items-center"}>
-            <div
+          <div
               className={
-                "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center border-4 border-white group-hover:border-gray-50"
+                "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center -ml-3"
               }
-            >
-              <i className={"bx bxs-credit-card-alt text-gray-700"} />
-            </div>
-            <div
-              className={
-                "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center border-4 border-white group-hover:border-gray-50 -ml-3"
-              }
-            >
-              <i className={"bx bxs-bank text-gray-700"} />
-            </div>
+          >
+            <i className={'bx bx-user text-gray-700'}/>
           </div>
 
           <span className={"text-sm text-gray-800 whitespace-nowrap mt-2"}>
-            Card or Bank Payment
+            Checkout as guest
           </span>
 
           <div className={"flex items-center space-x-1 mt-1"}>
@@ -106,13 +85,17 @@ export function CoinflowForm() {
           </div>
         </div>
 
+        <div className={'text-gray-600 h-full flex items-center'}>
+          <span>or</span>
+        </div>
+
         <div className={"relative flex-1"}>
           <div
             onClick={() => {
-              if (validateInvoiceForm()) setPaymentMethod(PaymentMethod.Crypto);
+              if (validateInvoiceForm()) setPaymentMethod(PaymentMethod.Wallet);
             }}
             className={`${
-              paymentMethod === PaymentMethod.Crypto
+              paymentMethod === PaymentMethod.Wallet
                 ? "ring-2 ring-indigo-500"
                 : "ring-[0.5px] ring-gray-200"
             } items-center py-5 flex h-[140px] justify-center cursor-pointer flex-col flex-1 rounded-2xl transition`}
@@ -122,16 +105,23 @@ export function CoinflowForm() {
                 "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center -ml-3"
               }
             >
-              <img className={"h-7 object-contain"} src={usdc} alt={"logo"} />
+              <i className={'bx bxs-wallet text-gray-700'}/>
             </div>
 
             <span className={"text-sm text-gray-800 whitespace-nowrap mt-2"}>
-              Pay with USDC
+              Connect a wallet
             </span>
             {!publicKey ? (
-              <span className={"text-sm text-gray-400 whitespace-nowrap mt-1"}>
-                Select a wallet
-              </span>
+                <div className={"flex items-center space-x-1 mt-1"}>
+                  <span className={"text-xs text-gray-400 whitespace-nowrap"}>
+                    Powered by
+                  </span>
+                  <img
+                      className={"h-4 object-contain opacity-50"}
+                      src={logo}
+                      alt={"logo"}
+                  />
+                </div>
             ) : (
               <span className={"text-xs text-gray-400 whitespace-nowrap mt-1"}>
                 Connected to {truncateString(publicKey.toString())}
@@ -141,7 +131,7 @@ export function CoinflowForm() {
             <div
               onClick={() => {
                 if (validateInvoiceForm()) {
-                  setPaymentMethod(PaymentMethod.Crypto);
+                  setPaymentMethod(PaymentMethod.Wallet);
                 }
               }}
               className={
@@ -154,27 +144,30 @@ export function CoinflowForm() {
         </div>
       </div>
 
-      {paymentMethod === PaymentMethod.Crypto ? (
-        <UsdcButton
-          email={email}
-          invoice={invoice}
-          amount={amount}
-          disabled={disabled}
-          onSuccess={(signature: string) => {
-            sendEmail();
-            setSuccessSignature(signature);
-          }}
-        />
-      ) : (
-        <PurchaseForm
-          email={email}
-          invoice={invoice}
-          amount={amount}
-          isReady={paymentMethod === PaymentMethod.Card}
-          setIsReady={() => setPaymentMethod(null)}
-          onSuccess={(pId: string) => setSuccessId(pId)}
-        />
+      {!disabled && (
+          <>
+            {paymentMethod === PaymentMethod.Wallet ? (
+                <PurchaseForm
+                    email={email}
+                    invoice={invoice}
+                    amount={amount}
+                    isReady={true}
+                    setIsReady={() => setPaymentMethod(null)}
+                    onSuccess={(pId: string) => setSuccessId(pId)}
+                />
+            ) : (
+                <PurchaseForm
+                    email={email}
+                    invoice={invoice}
+                    amount={amount}
+                    isReady={paymentMethod === PaymentMethod.Guest}
+                    setIsReady={() => setPaymentMethod(null)}
+                    onSuccess={(pId: string) => setSuccessId(pId)}
+                />
+            )}
+          </>
       )}
+
 
       <SuccessModal
         paymentId={successId}
@@ -183,99 +176,6 @@ export function CoinflowForm() {
         invoice={invoice}
         amount={Number(amount)}
       />
-    </div>
-  );
-}
-
-function UsdcButton({
-  email,
-  invoice,
-  amount,
-  disabled,
-  onSuccess,
-}: {
-  email: string;
-  invoice: string;
-  amount: string;
-  disabled: boolean;
-  onSuccess: (signature: string) => void;
-}) {
-  const wallet = useLocalWallet();
-  const [loading, setLoading] = useState<boolean>(false);
-
-  const transferTx = useMemo(() => {
-    if (!wallet.publicKey || !amount || isNaN(Number(amount))) return undefined;
-
-    // Mainnet
-    const usdc = new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
-
-    // Devnet
-    // const usdc = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
-
-    const source = getAssociatedTokenAddressSync(usdc, wallet.publicKey);
-
-    const destination = new PublicKey(
-      "FAC9vPRC5F46BAcsEr2A3jAxuCms569dS7wZuQuUDDgS",
-    );
-
-    const toSend = Number(amount) * Math.pow(10, 6);
-
-    const ixs = [];
-
-    ixs.push(
-      createTransferCheckedInstruction(
-        source,
-        usdc,
-        destination,
-        wallet.publicKey,
-        toSend,
-        6,
-      ),
-    );
-
-    ixs.push(createMemoInstruction(JSON.stringify({ invoice, email, amount })));
-
-    const tx = new Transaction().add(...ixs);
-
-    tx.feePayer = wallet.publicKey;
-    return tx;
-  }, [amount, wallet.publicKey, invoice, email]);
-
-  const { sendTransaction } = useLocalWallet();
-
-  const pay = useCallback(async () => {
-    if (transferTx) {
-      try {
-        setLoading(true);
-        const signature = await sendTransaction(transferTx);
-        onSuccess(signature);
-        setLoading(false);
-      } catch (e) {
-        // @ts-ignore
-        toast.error(e.message);
-        setLoading(false);
-      }
-    } else toast.error("Connect a wallet to pay");
-  }, [transferTx, onSuccess, sendTransaction]);
-
-  return (
-    <div className={"pt-5 px-4"}>
-      <button
-        disabled={disabled || loading}
-        onClick={pay}
-        className={
-          "flex disabled:opacity-50 disabled:cursor-not-allowed space-x-2 items-center hover:bg-indigo-500 transition justify-center p-5 px-6 w-full bg-indigo-600 text-white text-sm font-semibold rounded-2xl"
-        }
-      >
-        {loading ? (
-          <i className={"bx bx-loader bx-spin"} />
-        ) : (
-          <>
-            <i className={"bx bxs-lock-alt"} />
-            <span>Complete payment</span>
-          </>
-        )}
-      </button>
     </div>
   );
 }
@@ -294,7 +194,10 @@ function PurchaseForm({
   invoice: string;
   onSuccess: (pId: string) => void;
 }) {
-  const wallet = useLocalWallet();
+  const localWallet = useLocalWallet();
+  const solanaWallet = useWallet();
+  const wallet = solanaWallet.publicKey ? solanaWallet : localWallet;
+  const connection = localWallet.connection;
 
   const [height, setHeight] = useState<number>(1300);
   const [handleHeightChange, setHandleHeightChange] = useState<
@@ -311,7 +214,7 @@ function PurchaseForm({
     }
   }, [handleHeight, wallet]);
 
-  if (!wallet.connection || !amount || Number(amount) === 0) return null;
+  if (!connection || !amount || Number(amount) === 0) return null;
 
   return (
     <>
@@ -321,10 +224,13 @@ function PurchaseForm({
             wallet={wallet}
             merchantId={"triton"}
             env={"prod"}
-            connection={wallet.connection}
+            connection={connection}
             onSuccess={(...args) => {
               const data = JSON.parse(args[0]);
-              onSuccess(data.info.paymentId);
+              if ('info' in data)
+                onSuccess(data.info.paymentId);
+
+              onSuccess(data.data);
             }}
             blockchain={"solana"}
             amount={Number(amount)}
