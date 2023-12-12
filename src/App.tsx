@@ -7,12 +7,9 @@ import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { WalletContextProvider } from "./wallet/Wallet.tsx";
 import { InvoiceContextProvider } from "./context/InvoiceContext.tsx";
 import { Toaster } from "react-hot-toast";
-import { useEffect } from "react";
-import emailjs from "@emailjs/browser";
 import { useSearchParams } from "react-router-dom";
 
 function App() {
-  useEffect(() => emailjs.init("IMYCo5CVNWBo_LjMF"), []);
   const [searchParams] = useSearchParams();
 
   searchParams.get("amount");
