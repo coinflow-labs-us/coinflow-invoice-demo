@@ -4,7 +4,7 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useLocalWallet } from "../../wallet/Wallet.tsx";
 import SuccessModal from "../modals/SuccessModal.tsx";
 import { useInvoiceContext } from "../../context/InvoiceContext.tsx";
-import logo from "../../assets/LogoTextBlack.png";
+import usdc from "../../assets/usdc-logo.png";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { truncateString } from "../../utils/helpers.ts";
 
@@ -61,35 +61,39 @@ export function CoinflowForm() {
               : "ring-[0.5px] ring-gray-200"
           } flex-1 rounded-2xl hover:bg-gray-50 transition`}
         >
-          <div
-              className={
-                "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center -ml-3"
-              }
-          >
-            <i className={'bx bx-user text-gray-700'}/>
+          <div className={"flex items-center"}>
+            <div
+                className={
+                  "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center border-4 border-white group-hover:border-gray-50"
+                }
+            >
+              <i className={"bx bxs-credit-card-alt text-gray-700"} />
+            </div>
+            <div
+                className={
+                  "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center border-4 border-white group-hover:border-gray-50 -ml-3"
+                }
+            >
+              <i className={"bx bxs-bank text-gray-700"} />
+            </div>
           </div>
+
+          <span className={"text-sm text-gray-800 whitespace-nowrap mt-2"}>
+            Card or ACH Payment
+          </span>
+
+          <hr className="h-[1px] mt-2 bg-gray-200 border-0 w-[80%] rounded-full"/>
 
           <span className={"text-sm text-gray-800 whitespace-nowrap mt-2"}>
             Checkout as guest
           </span>
-
-          <div className={"flex items-center space-x-1 mt-1"}>
-            <span className={"text-xs text-gray-400 whitespace-nowrap"}>
-              Powered by
-            </span>
-            <img
-              className={"h-4 object-contain opacity-50"}
-              src={logo}
-              alt={"logo"}
-            />
-          </div>
         </div>
 
         <div className={'text-gray-600 h-full flex items-center'}>
           <span>or</span>
         </div>
 
-        <div className={"relative flex-1"}>
+        <div className={"relative flex-1 hover:bg-gray-50 transition"}>
           <div
             onClick={() => {
               if (validateInvoiceForm()) setPaymentMethod(PaymentMethod.Wallet);
@@ -100,33 +104,42 @@ export function CoinflowForm() {
                 : "ring-[0.5px] ring-gray-200"
             } items-center py-5 flex h-[140px] justify-center cursor-pointer flex-col flex-1 rounded-2xl transition`}
           >
-            <div
-              className={
-                "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center -ml-3"
-              }
-            >
-              <i className={'bx bxs-wallet text-gray-700'}/>
+            <div className={"flex items-center"}>
+              <div
+                  className={
+                    "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center border-4 border-white group-hover:border-gray-50"
+                  }
+              >
+                <i className={"bx bxs-credit-card-alt text-gray-700"} />
+              </div>
+              <div
+                  className={
+                    "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center border-4 border-white group-hover:border-gray-50 -ml-3"
+                  }
+              >
+                <i className={"bx bxs-bank text-gray-700"} />
+              </div>
+              <div
+                  className={
+                    "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center border-4 border-white group-hover:border-gray-50 -ml-3"
+                  }
+              >
+                <img className={"h-7 object-contain"} src={usdc} alt={"logo"} />
+              </div>
             </div>
+
+            <span className={"text-sm text-gray-800 whitespace-nowrap mt-2"}>
+              Card, ACH, or USDC
+            </span>
+
+            <hr className="h-[1px] min-h-[1px] mt-2 bg-gray-200 border-0 w-[80%] rounded-full"/>
 
             <span className={"text-sm text-gray-800 whitespace-nowrap mt-2"}>
               Connect a wallet
             </span>
-            {!publicKey ? (
-                <div className={"flex items-center space-x-1 mt-1"}>
-                  <span className={"text-xs text-gray-400 whitespace-nowrap"}>
-                    Powered by
-                  </span>
-                  <img
-                      className={"h-4 object-contain opacity-50"}
-                      src={logo}
-                      alt={"logo"}
-                  />
-                </div>
-            ) : (
-              <span className={"text-xs text-gray-400 whitespace-nowrap mt-1"}>
+            {publicKey && <span className={"text-xs text-gray-400 whitespace-nowrap mt-1"}>
                 Connected to {truncateString(publicKey.toString())}
-              </span>
-            )}
+              </span>}
 
             <div
               onClick={() => {
