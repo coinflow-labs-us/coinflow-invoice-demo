@@ -4,10 +4,10 @@ import {
   RefObject,
   useCallback,
   useContext,
-  useMemo,
   useRef,
   useState,
 } from "react";
+import {useQueryParam} from "../hooks/useQueryParam.ts";
 
 export interface InvoiceContextProps {
   email: string;
@@ -23,7 +23,6 @@ export interface InvoiceContextProps {
   form: RefObject<HTMLFormElement | undefined>;
   successSignature: string | null;
   setSuccessSignature: (s: string | null) => void;
-  amountDisabled: boolean;
 }
 
 export const InvoiceContext = createContext<InvoiceContextProps>({
@@ -43,7 +42,6 @@ export const InvoiceContext = createContext<InvoiceContextProps>({
   formIsComplete(): boolean {
     return false;
   },
-  amountDisabled: false,
 });
 
 export enum ErrorType {
@@ -56,22 +54,16 @@ export type FormError = { type: string; message: string };
 
 export function InvoiceContextProvider({
   children,
-  urlAmount,
 }: {
   children: ReactNode;
-  urlAmount: string | null;
 }) {
-  const [email, setEmail] = useState<string>("");
-  const [amount, setAmount] = useState<string>(urlAmount ?? "");
-  const [invoice, setInvoice] = useState<string>("");
+  const [email, setEmail] = useQueryParam<string>("email", "");
+  const [amount, setAmount] = useQueryParam<string>("amount", "");
+  const [invoice, setInvoice] = useQueryParam<string>("invoice", "");
   const [formError, setFormError] = useState<FormError | null>(null);
   const [successSignature, setSuccessSignature] = useState<string | null>(null);
 
   const form = useRef<HTMLFormElement | undefined>(null);
-
-  const amountDisabled = useMemo(() => {
-    return Boolean(urlAmount);
-  }, [urlAmount]);
 
   /**
    * Validate email with regex
@@ -153,7 +145,6 @@ export function InvoiceContextProvider({
         form,
         successSignature,
         setSuccessSignature,
-        amountDisabled,
       }}
     >
       {children}

@@ -21,7 +21,7 @@ function App() {
             <Toaster />
             <div className={"grid grid-cols-1 md:grid-cols-2 h-full w-full"}>
               <BrandCover />
-              <InvoiceContextProvider urlAmount={searchParams.get("amount")}>
+              <InvoiceContextProvider>
                 <PaymentPage />
               </InvoiceContextProvider>
             </div>
