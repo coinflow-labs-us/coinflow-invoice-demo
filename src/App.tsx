@@ -59,7 +59,7 @@ function PaymentPage() {
         <CoinflowPurchase
           wallet={wallet}
           merchantId={"triton"}
-          env={"prod"}
+          env={"sandbox"}
           onSuccess={(...args) => {
             console.log("success", args);
           }}
