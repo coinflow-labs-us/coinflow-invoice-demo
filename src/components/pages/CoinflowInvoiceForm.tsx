@@ -13,7 +13,7 @@ enum PaymentMethod {
   Wallet = "wallet",
 }
 
-export function CoinflowForm() {
+export function CoinflowInvoiceForm() {
   const wallet = useLocalWallet();
   const { publicKey } = useWallet();
 

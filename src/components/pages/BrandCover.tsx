@@ -1,6 +1,6 @@
 import tritonLogo from "../../assets/triton_circle_logo.webp";
 
-export function BrandCover() {
+export function BrandCover({subtext}: {subtext: string}) {
   return (
     <div>
       <div
@@ -28,8 +28,7 @@ export function BrandCover() {
           Triton One RPC
         </span>
         <span className={"text-gray-500 text-base"}>
-          Pay your Triton One RPC invoice here. Include your email address and
-          invoice number so we can match the payment to your account.
+          {subtext}
         </span>
       </div>
     </div>
