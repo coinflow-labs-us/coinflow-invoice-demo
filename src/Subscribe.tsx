@@ -2,11 +2,12 @@ import "./App.css";
 import { BrandCover } from "./components/pages/BrandCover.tsx";
 import { WalletProvider } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import {useLocalWallet, WalletContextProvider} from "./wallet/Wallet.tsx";
+import { useLocalWallet, WalletContextProvider } from "./wallet/Wallet.tsx";
 import { Toaster } from "react-hot-toast";
-import {useQueryParam} from "./hooks/useQueryParam.ts";
-import {useCallback, useEffect, useState} from "react";
-import {CoinflowPurchase} from "@coinflowlabs/react";
+import { useQueryParam } from "./hooks/useQueryParam.ts";
+import { useCallback, useEffect, useState } from "react";
+import { CoinflowPurchase } from "@coinflowlabs/react";
+import SuccessModal from "./components/modals/SuccessModal.tsx";
 
 function Subscribe() {
   return (
@@ -16,7 +17,7 @@ function Subscribe() {
           <div className={"flex flex-1 h-screen w-screen relative"}>
             <Toaster />
             <div className={"grid grid-cols-1 md:grid-cols-2 h-full w-full"}>
-              <BrandCover subtext={'Subscribe to a Triton One Plan'}/>
+              <BrandCover subtext={"Subscribe to a Triton One Plan"} />
               <PaymentPage />
             </div>
           </div>
@@ -29,9 +30,12 @@ function Subscribe() {
 function PaymentPage() {
   const wallet = useLocalWallet();
   const connection = wallet.connection;
-  const [planCode] = useQueryParam('planCode', '');
-  const [accountUuid] = useQueryParam('accountUuid', '');
-  const [email] = useQueryParam('email', '');
+  const [planCode] = useQueryParam("planCode", "");
+  const [accountUuid] = useQueryParam("accountUuid", "");
+  const [email] = useQueryParam("email", "");
+
+  const [successId, setSuccessId] = useState<string | null>(null);
+  const [open, setOpen] = useState<boolean>(false);
 
   const [height, setHeight] = useState<number>(1300);
   const [handleHeightChange, setHandleHeightChange] = useState<
@@ -48,6 +52,11 @@ function PaymentPage() {
     }
   }, [handleHeight, wallet]);
 
+  const onSuccess = useCallback((successId: string) => {
+    setSuccessId(successId);
+    setOpen(true);
+  }, []);
+
   if (!planCode || !accountUuid || !email || !connection) return null;
 
   return (
@@ -59,6 +68,10 @@ function PaymentPage() {
           env={"sandbox"}
           onSuccess={(...args) => {
             console.log("success", args);
+            const data = JSON.parse(args[0]);
+            if ("info" in data) return onSuccess(data.info?.paymentId);
+
+            onSuccess(data.data);
           }}
           blockchain={"solana"}
           connection={connection}
@@ -76,6 +89,15 @@ function PaymentPage() {
           planCode={planCode}
         />
       </div>
+
+      <SuccessModal
+        paymentId={successId}
+        signature={""}
+        setIsOpen={() => setOpen(false)}
+        invoice={planCode}
+        amount={0}
+        open={open}
+      />
     </div>
   );
 }

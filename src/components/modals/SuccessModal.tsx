@@ -8,12 +8,14 @@ export default function SuccessModal({
   invoice,
   amount,
   paymentId,
+  open,
 }: {
   signature: string | null;
   setIsOpen: (s: string | null) => void;
   invoice: string;
   amount: number;
   paymentId: string | null;
+  open: boolean;
 }) {
   const text = `Payment Amount:\n$${amount.toFixed(
     2,
@@ -21,11 +23,7 @@ export default function SuccessModal({
 
   return (
     <>
-      <Transition
-        appear
-        show={Boolean(signature) || Boolean(paymentId)}
-        as={Fragment}
-      >
+      <Transition appear show={Boolean(open)} as={Fragment}>
         <Dialog
           as="div"
           className="relative z-50"
@@ -74,54 +72,58 @@ export default function SuccessModal({
                   >
                     Payment complete
                   </Dialog.Title>
-                  <h1
-                    className={
-                      "font-bold text-gray-900 text-2xl text-center mb-4"
-                    }
-                  >
-                    ${amount.toFixed(2)}
-                  </h1>
-                  <button
-                    onClick={() => copyTextToClipboard(text)}
-                    className="flex flex-col bg-gray-100 w-full items-start rounded-xl p-3 relative outline-none flex-1 "
-                  >
-                    <p className="text-xs text-gray-500 font-medium mb-1">
-                      Payment
-                    </p>
-                    <p className="text-sm text-gray-800 font-medium mb-4">
+                  {amount ? (
+                    <h1
+                      className={
+                        "font-bold text-gray-900 text-2xl text-center mb-4"
+                      }
+                    >
                       ${amount.toFixed(2)}
-                    </p>
-                    <p className="text-xs text-gray-500 font-medium mb-1">
-                      Invoice #
-                    </p>
-                    <p className="text-sm text-gray-800 font-medium mb-4">
-                      {invoice}
-                    </p>
-                    {signature ? (
-                      <>
-                        <p className="text-xs text-gray-500 font-medium mb-1">
-                          Transaction signature
-                        </p>
-                        <p className="text-xs text-gray-800 flex-1 font-medium break-all text-start">
-                          {signature}
-                        </p>
-                        <i
-                          className={
-                            "bx bx-copy-alt text-gray-600 hover:text-indigo-500 transition absolute right-3 top-3"
-                          }
-                        />
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-xs text-gray-500 font-medium mb-1">
-                          Payment ID
-                        </p>
-                        <p className="text-xs text-gray-800 flex-1 font-medium break-all text-start">
-                          {paymentId}
-                        </p>
-                      </>
-                    )}
-                  </button>
+                    </h1>
+                  ) : null}
+                  {invoice ? (
+                    <button
+                      onClick={() => copyTextToClipboard(text)}
+                      className="flex flex-col bg-gray-100 w-full items-start rounded-xl p-3 relative outline-none flex-1 "
+                    >
+                      <p className="text-xs text-gray-500 font-medium mb-1">
+                        Payment
+                      </p>
+                      <p className="text-sm text-gray-800 font-medium mb-4">
+                        ${amount.toFixed(2)}
+                      </p>
+                      <p className="text-xs text-gray-500 font-medium mb-1">
+                        Invoice #
+                      </p>
+                      <p className="text-sm text-gray-800 font-medium mb-4">
+                        {invoice}
+                      </p>
+                      {signature ? (
+                        <>
+                          <p className="text-xs text-gray-500 font-medium mb-1">
+                            Transaction signature
+                          </p>
+                          <p className="text-xs text-gray-800 flex-1 font-medium break-all text-start">
+                            {signature}
+                          </p>
+                          <i
+                            className={
+                              "bx bx-copy-alt text-gray-600 hover:text-indigo-500 transition absolute right-3 top-3"
+                            }
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-xs text-gray-500 font-medium mb-1">
+                            Payment ID
+                          </p>
+                          <p className="text-xs text-gray-800 flex-1 font-medium break-all text-start">
+                            {paymentId}
+                          </p>
+                        </>
+                      )}
+                    </button>
+                  ) : null}
                 </Dialog.Panel>
               </Transition.Child>
             </div>
