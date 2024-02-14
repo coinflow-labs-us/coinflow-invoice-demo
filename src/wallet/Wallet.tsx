@@ -8,7 +8,6 @@ import {
   useState,
 } from "react";
 import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
-import { useLocalStorage } from "./useLocalStorage";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 export interface WalletContextProps {
@@ -29,9 +28,9 @@ export function WalletContextProvider({ children }: { children: ReactNode }) {
   const wallet = useWallet();
   const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
 
-  const [keypairLocalStorage, setKeypairLocalStorage] = useLocalStorage<
+  const [keypairLocalStorage, setKeypairLocalStorage] = useState<
     string | null
-  >("keypair", null);
+  >(null);
 
   useEffect(() => {
     if (wallet.publicKey) {
