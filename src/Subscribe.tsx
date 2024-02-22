@@ -54,7 +54,7 @@ function PaymentPage() {
   if (!planCode || !accountUuid || !email || !connection) return null;
 
   return (
-    <div className={"bg-white p-1 md:p-12 lg:p-28 w-full max-w-full"}>
+    <div className={"bg-white md:p-12 lg:p-28 !pt-12 w-full max-w-full"}>
       <div style={{ height: `${height}px` }} className={`w-full`}>
         <CoinflowPurchase
           wallet={wallet}
