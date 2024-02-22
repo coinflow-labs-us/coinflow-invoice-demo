@@ -5,6 +5,31 @@ services:
     branch: main
     buildCommand: npm install && npm run build
     staticPublishPath: build
+    domains:
+      - triton.coinflow.cash
+    envVars:
+      - key: VITE_ENV
+        value: prod
+      - key: VITE_RPC_URL
+        value: https://phantasi-main-f4f6.mainnet.rpcpool.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  - type: web
+    name: triton-staging
+    env: static
+    branch: main
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
+    domains:
+      - triton-staging.coinflow.cash
+    envVars:
+      - key: VITE_ENV
+        value: sandbox
+      - key: VITE_RPC_URL
+        value: https://phantasi-develope-8dd8.devnet.rpcpool.com/c4188c94-d47c-43d0-bbc0-bad3dbd2af4e
     routes:
       - type: rewrite
         source: /*

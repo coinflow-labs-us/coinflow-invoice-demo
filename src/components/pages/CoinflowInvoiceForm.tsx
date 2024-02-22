@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useMemo, useState} from "react";
-import { CoinflowPurchase } from "@coinflowlabs/react";
+import {CoinflowPurchase} from "@coinflowlabs/react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useLocalWallet } from "../../wallet/Wallet.tsx";
 import SuccessModal from "../modals/SuccessModal.tsx";
@@ -7,6 +7,7 @@ import { useInvoiceContext } from "../../context/InvoiceContext.tsx";
 import usdc from "../../assets/usdc-logo.png";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { truncateString } from "../../utils/helpers.ts";
+import {useCoinflowEnv} from "../../hooks/useCoinflowEnv.ts";
 
 enum PaymentMethod {
   Guest = "guest",
@@ -227,16 +228,18 @@ function PurchaseForm({
     }
   }, [handleHeight, wallet]);
 
+  const env = useCoinflowEnv();
+
   if (!connection || !amount || Number(amount) === 0) return null;
 
   return (
     <>
-      {isReady ? (
+      {isReady && (
         <div style={{ height: `${height}px` }} className={`w-full`}>
           <CoinflowPurchase
             wallet={wallet}
             merchantId={"triton"}
-            env={"prod"}
+            env={env}
             connection={connection}
             onSuccess={(...args) => {
               const data = JSON.parse(args[0]);
@@ -260,7 +263,7 @@ function PurchaseForm({
             ]}
           />
         </div>
-      ) : null}
+      )}
     </>
   );
 }
