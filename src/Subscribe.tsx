@@ -7,6 +7,7 @@ import { Toaster } from "react-hot-toast";
 import {useQueryParam} from "./hooks/useQueryParam.ts";
 import {useCallback, useEffect, useState} from "react";
 import {CoinflowPurchase} from "@coinflowlabs/react";
+import {useCoinflowEnv} from "./hooks/useCoinflowEnv.ts";
 
 function Subscribe() {
   return (
@@ -48,6 +49,8 @@ function PaymentPage() {
     }
   }, [handleHeight, wallet]);
 
+  const env = useCoinflowEnv();
+
   if (!planCode || !accountUuid || !email || !connection) return null;
 
   return (
@@ -56,7 +59,7 @@ function PaymentPage() {
         <CoinflowPurchase
           wallet={wallet}
           merchantId={"triton"}
-          env={"sandbox"}
+          env={env}
           onSuccess={(...args) => {
             console.log("success", args);
           }}
