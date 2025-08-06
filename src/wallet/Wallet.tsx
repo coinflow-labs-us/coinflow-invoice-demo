@@ -8,7 +8,6 @@ import {
   useState,
 } from "react";
 import { Connection, Keypair, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
-import { useWallet } from "@solana/wallet-adapter-react";
 
 export interface WalletContextProps {
   connected: boolean;
@@ -25,18 +24,11 @@ const WalletContext = createContext<WalletContextProps>({
 });
 
 export function WalletContextProvider({ children }: { children: ReactNode }) {
-  const wallet = useWallet();
   const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
 
   const [keypairLocalStorage, setKeypairLocalStorage] = useState<
     string | null
   >(null);
-
-  useEffect(() => {
-    if (wallet.publicKey) {
-      setPublicKey(wallet.publicKey);
-    }
-  }, [wallet]);
 
   useEffect(() => {
     if (keypairLocalStorage) return;
@@ -53,10 +45,10 @@ export function WalletContextProvider({ children }: { children: ReactNode }) {
   }, [keypairLocalStorage]);
 
   useEffect(() => {
-    if (!keypair || wallet.publicKey) return;
+    if (!keypair) return;
     if (publicKey?.equals(keypair.publicKey)) return;
     setPublicKey(keypair.publicKey);
-  }, [keypair, publicKey, wallet]);
+  }, [keypair, publicKey]);
 
   const connected = useMemo(() => !!publicKey, [publicKey]);
 
@@ -67,19 +59,6 @@ export function WalletContextProvider({ children }: { children: ReactNode }) {
 
   const sendTransaction = useCallback(
     async <T extends Transaction | VersionedTransaction>(transaction: T) => {
-      if (wallet.publicKey && wallet.signTransaction) {
-        const latestBlockHash =
-          await connection.getLatestBlockhash("confirmed");
-        
-        if (transaction instanceof VersionedTransaction) {
-          transaction.message.recentBlockhash = latestBlockHash.blockhash;
-        } else if (transaction instanceof Transaction) {
-          transaction.recentBlockhash = latestBlockHash.blockhash;
-        }
-        await wallet.signTransaction(transaction);
-        return await wallet.sendTransaction(transaction, connection);
-      }
-
       if (!keypair) throw new Error("Keypair not found");
       if (transaction instanceof Transaction) {
         transaction.partialSign(keypair);
@@ -89,7 +68,7 @@ export function WalletContextProvider({ children }: { children: ReactNode }) {
       
       return await connection.sendRawTransaction(transaction.serialize());
     },
-    [connection, keypair, wallet],
+    [connection, keypair],
   );
 
   return (

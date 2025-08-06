@@ -1,12 +1,9 @@
 import {useCallback, useEffect, useMemo, useState} from "react";
 import {CoinflowPurchase, PaymentMethods} from "@coinflowlabs/react";
-// import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useLocalWallet } from "../../wallet/Wallet.tsx";
 import SuccessModal from "../modals/SuccessModal.tsx";
 import { useInvoiceContext } from "../../context/InvoiceContext.tsx";
 import usdc from "../../assets/usdc-logo.png";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { truncateString } from "../../utils/helpers.ts";
 import {useCoinflowEnv} from "../../hooks/useCoinflowEnv.ts";
 
 enum PaymentMethod {
@@ -16,7 +13,6 @@ enum PaymentMethod {
 
 export function CoinflowInvoiceForm() {
   const wallet = useLocalWallet();
-  const { publicKey } = useWallet();
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.Guest); 
   const [successId, setSuccessId] = useState<string | null>(null);
@@ -92,20 +88,6 @@ export function CoinflowInvoiceForm() {
             } items-center py-5 flex h-[140px] justify-center cursor-pointer flex-col flex-1 rounded-2xl transition`}
           >
             <div className={"flex items-center"}>
-              {/* <div
-                  className={
-                    "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center border-4 border-white group-hover:border-gray-50"
-                  }
-              >
-                <i className={"bx bxs-credit-card-alt text-gray-700"} />
-              </div> */}
-              {/* <div
-                  className={
-                    "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center border-4 border-white group-hover:border-gray-50 -ml-3"
-                  }
-              >
-                <i className={"bx bxs-bank text-gray-700"} />
-              </div> */}
               <div
                   className={
                     "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center border-4 border-white group-hover:border-gray-50 -ml-3"
@@ -119,10 +101,6 @@ export function CoinflowInvoiceForm() {
               Pay with Crypto
             </span>
 
-            {publicKey && <span className={"text-xs text-gray-400 whitespace-nowrap mt-1"}>
-                Connected to {truncateString(publicKey.toString())}
-              </span>}
-
             <div
               onClick={() => {
                 if (validateInvoiceForm()) {
@@ -133,13 +111,10 @@ export function CoinflowInvoiceForm() {
                 "large-wallet mt-2 absolute top-0 bottom-0 left-0 right-0 h-full w-full"
               }
             >
-             {/* <WalletMultiButton /> */}
             </div>
           </div>
         </div>
       </div>
-
-      {/* <button onClick={() => {}}>Connect a Solana wallet to continue</button> */}
 
       {!disabled && (
         <>
@@ -148,7 +123,6 @@ export function CoinflowInvoiceForm() {
               email={email}
               invoice={invoice}
               amount={Number(amount)}
-              setIsReady={() => setPaymentMethod(null)}
               onSuccess={(pId: string) => setSuccessId(pId)}
               allowedPaymentMethods={[PaymentMethods.crypto]}
             />
@@ -158,7 +132,6 @@ export function CoinflowInvoiceForm() {
               email={email}
               invoice={invoice}
               amount={Number(amount)}
-              setIsReady={() => setPaymentMethod(null)}
               onSuccess={(pId: string) => setSuccessId(pId)}
             />
           </div>
@@ -184,16 +157,13 @@ function CoinflowForm({
   allowedPaymentMethods
 }: {
   amount: number;
-  setIsReady: (isReady: boolean) => void;
   email: string;
   invoice: string;
   onSuccess: (pId: string) => void;
   allowedPaymentMethods?: PaymentMethods[];
 }) {
-  const localWallet = useLocalWallet();
-  const solanaWallet = useWallet();
-  const wallet = solanaWallet.publicKey ? solanaWallet : localWallet;
-  const connection = localWallet.connection;
+  const wallet = useLocalWallet();
+  const connection = wallet.connection;
 
   const [height, setHeight] = useState<number>(1300);
   const [handleHeightChange, setHandleHeightChange] = useState<
@@ -218,7 +188,7 @@ function CoinflowForm({
     <div style={{ height: `${height}px` }} className={`w-full`}>
       <CoinflowPurchase
         allowedPaymentMethods={allowedPaymentMethods ?? undefined}
-        wallet={localWallet}
+        wallet={wallet}
         blockchain={"solana"}
         merchantId={"triton"}
         env={env}
