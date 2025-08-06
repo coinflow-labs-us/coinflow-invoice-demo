@@ -7,14 +7,14 @@ import {
   useMemo,
   useState,
 } from "react";
-import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
+import { Connection, Keypair, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 export interface WalletContextProps {
   connected: boolean;
   publicKey: PublicKey | null;
   connection: Connection | null;
-  sendTransaction: (transaction: Transaction) => Promise<string>;
+  sendTransaction: <T extends Transaction | VersionedTransaction>(transaction: T) => Promise<string>;
 }
 
 const WalletContext = createContext<WalletContextProps>({
@@ -61,21 +61,32 @@ export function WalletContextProvider({ children }: { children: ReactNode }) {
   const connected = useMemo(() => !!publicKey, [publicKey]);
 
   const connection = useMemo(() => {
+    console.log("RPC URL", import.meta.env.VITE_RPC_URL);
     return new Connection(import.meta.env.VITE_RPC_URL, "confirmed");
   }, []);
 
   const sendTransaction = useCallback(
-    async (transaction: Transaction) => {
+    async <T extends Transaction | VersionedTransaction>(transaction: T) => {
       if (wallet.publicKey && wallet.signTransaction) {
         const latestBlockHash =
           await connection.getLatestBlockhash("confirmed");
-        transaction.recentBlockhash = latestBlockHash.blockhash;
+        
+        if (transaction instanceof VersionedTransaction) {
+          transaction.message.recentBlockhash = latestBlockHash.blockhash;
+        } else if (transaction instanceof Transaction) {
+          transaction.recentBlockhash = latestBlockHash.blockhash;
+        }
         await wallet.signTransaction(transaction);
         return await wallet.sendTransaction(transaction, connection);
       }
 
       if (!keypair) throw new Error("Keypair not found");
-      transaction.partialSign(keypair);
+      if (transaction instanceof Transaction) {
+        transaction.partialSign(keypair);
+      } else if (transaction instanceof VersionedTransaction) {
+        transaction.sign([keypair]);
+      }
+      
       return await connection.sendRawTransaction(transaction.serialize());
     },
     [connection, keypair, wallet],

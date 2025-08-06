@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useMemo, useState} from "react";
-import {CoinflowPurchase} from "@coinflowlabs/react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import {CoinflowPurchase, PaymentMethods} from "@coinflowlabs/react";
+// import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useLocalWallet } from "../../wallet/Wallet.tsx";
 import SuccessModal from "../modals/SuccessModal.tsx";
 import { useInvoiceContext } from "../../context/InvoiceContext.tsx";
@@ -18,9 +18,7 @@ export function CoinflowInvoiceForm() {
   const wallet = useLocalWallet();
   const { publicKey } = useWallet();
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(
-    null,
-  );
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.Guest); 
   const [successId, setSuccessId] = useState<string | null>(null);
 
   const {
@@ -32,14 +30,6 @@ export function CoinflowInvoiceForm() {
     successSignature,
     setSuccessSignature,
   } = useInvoiceContext();
-
-  useEffect(() => {
-    if (publicKey) {
-      setPaymentMethod(PaymentMethod.Wallet);
-    } else {
-      setPaymentMethod(null);
-    }
-  }, [publicKey]);
 
   const disabled = useMemo(() => {
     return !formIsComplete();
@@ -62,6 +52,7 @@ export function CoinflowInvoiceForm() {
               : "ring-[0.5px] ring-gray-200"
           } flex-1 rounded-2xl hover:bg-gray-50 transition`}
         >
+          {/* Guest Payment Option */}
           <div className={"flex items-center"}>
             <div
                 className={
@@ -82,18 +73,13 @@ export function CoinflowInvoiceForm() {
           <span className={"text-sm text-gray-800 whitespace-nowrap mt-2"}>
             Card or ACH Payment
           </span>
-
-          <hr className="h-[1px] mt-2 bg-gray-200 border-0 w-[80%] rounded-full"/>
-
-          <span className={"text-sm text-gray-800 whitespace-nowrap mt-2"}>
-            Checkout as guest
-          </span>
         </div>
 
         <div className={'text-gray-600 h-full flex items-center'}>
           <span>or</span>
         </div>
 
+        {/* Wallet Payment Option */}
         <div className={"relative flex-1 hover:bg-gray-50 transition"}>
           <div
             onClick={() => {
@@ -106,20 +92,20 @@ export function CoinflowInvoiceForm() {
             } items-center py-5 flex h-[140px] justify-center cursor-pointer flex-col flex-1 rounded-2xl transition`}
           >
             <div className={"flex items-center"}>
-              <div
+              {/* <div
                   className={
                     "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center border-4 border-white group-hover:border-gray-50"
                   }
               >
                 <i className={"bx bxs-credit-card-alt text-gray-700"} />
-              </div>
-              <div
+              </div> */}
+              {/* <div
                   className={
                     "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center border-4 border-white group-hover:border-gray-50 -ml-3"
                   }
               >
                 <i className={"bx bxs-bank text-gray-700"} />
-              </div>
+              </div> */}
               <div
                   className={
                     "rounded-full h-10 w-10 flex bg-gray-100 items-center justify-center border-4 border-white group-hover:border-gray-50 -ml-3"
@@ -130,14 +116,9 @@ export function CoinflowInvoiceForm() {
             </div>
 
             <span className={"text-sm text-gray-800 whitespace-nowrap mt-2"}>
-              Card, ACH, or USDC
+              Pay with Crypto
             </span>
 
-            <hr className="h-[1px] min-h-[1px] mt-2 bg-gray-200 border-0 w-[80%] rounded-full"/>
-
-            <span className={"text-sm text-gray-800 whitespace-nowrap mt-2"}>
-              Connect a wallet
-            </span>
             {publicKey && <span className={"text-xs text-gray-400 whitespace-nowrap mt-1"}>
                 Connected to {truncateString(publicKey.toString())}
               </span>}
@@ -152,36 +133,37 @@ export function CoinflowInvoiceForm() {
                 "large-wallet mt-2 absolute top-0 bottom-0 left-0 right-0 h-full w-full"
               }
             >
-              <WalletMultiButton />
+             {/* <WalletMultiButton /> */}
             </div>
           </div>
         </div>
       </div>
 
-      {!disabled && (
-          <>
-            {paymentMethod === PaymentMethod.Wallet ? (
-                <PurchaseForm
-                    email={email}
-                    invoice={invoice}
-                    amount={amount}
-                    isReady={true}
-                    setIsReady={() => setPaymentMethod(null)}
-                    onSuccess={(pId: string) => setSuccessId(pId)}
-                />
-            ) : (
-                <PurchaseForm
-                    email={email}
-                    invoice={invoice}
-                    amount={amount}
-                    isReady={paymentMethod === PaymentMethod.Guest}
-                    setIsReady={() => setPaymentMethod(null)}
-                    onSuccess={(pId: string) => setSuccessId(pId)}
-                />
-            )}
-          </>
-      )}
+      {/* <button onClick={() => {}}>Connect a Solana wallet to continue</button> */}
 
+      {!disabled && (
+        <>
+          <div className={`${paymentMethod === PaymentMethod.Wallet ? 'visible' : 'hidden'}`}>
+            <CoinflowForm
+              email={email}
+              invoice={invoice}
+              amount={Number(amount)}
+              setIsReady={() => setPaymentMethod(null)}
+              onSuccess={(pId: string) => setSuccessId(pId)}
+              allowedPaymentMethods={[PaymentMethods.crypto]}
+            />
+          </div>
+          <div className={`${paymentMethod !== PaymentMethod.Wallet ? 'visible' : 'hidden'}`}>
+            <CoinflowForm
+              email={email}
+              invoice={invoice}
+              amount={Number(amount)}
+              setIsReady={() => setPaymentMethod(null)}
+              onSuccess={(pId: string) => setSuccessId(pId)}
+            />
+          </div>
+        </>
+      )}
 
       <SuccessModal
         paymentId={successId}
@@ -194,19 +176,19 @@ export function CoinflowInvoiceForm() {
   );
 }
 
-function PurchaseForm({
+function CoinflowForm({
   amount,
   email,
   invoice,
-  isReady,
   onSuccess,
+  allowedPaymentMethods
 }: {
-  amount: string;
+  amount: number;
   setIsReady: (isReady: boolean) => void;
-  isReady: boolean;
   email: string;
   invoice: string;
   onSuccess: (pId: string) => void;
+  allowedPaymentMethods?: PaymentMethods[];
 }) {
   const localWallet = useLocalWallet();
   const solanaWallet = useWallet();
@@ -233,37 +215,40 @@ function PurchaseForm({
   if (!connection || !amount || Number(amount) === 0) return null;
 
   return (
-    <>
-      {isReady && (
-        <div style={{ height: `${height}px` }} className={`w-full`}>
-          <CoinflowPurchase
-            wallet={wallet}
-            merchantId={"triton"}
-            env={env}
-            connection={connection}
-            onSuccess={(...args) => {
-              const data = JSON.parse(args[0]);
-              if ('info' in data)
-                onSuccess(data.info.paymentId);
+    <div style={{ height: `${height}px` }} className={`w-full`}>
+      <CoinflowPurchase
+        allowedPaymentMethods={allowedPaymentMethods ?? undefined}
+        wallet={localWallet}
+        blockchain={"solana"}
+        merchantId={"triton"}
+        env={env}
+        connection={connection}
+        onSuccess={(...args) => {
+          if (typeof args[0] !=='string') {
+            onSuccess(args[0].paymentId); 
+            return;
+          }
 
-              onSuccess(data.data);
-            }}
-            blockchain={"solana"}
-            amount={Number(amount)}
-            email={email}
-            webhookInfo={{ invoice, amount, email }}
-            loaderBackground={"#FFFFFF"}
-            handleHeightChange={handleHeightChange}
-            chargebackProtectionData={[
-              {
-                productName: "RPC Provider Subscription",
-                productType: "subscription",
-                quantity: Number(amount),
-              },
-            ]}
-          />
-        </div>
-      )}
-    </>
+          const data = JSON.parse(args[0]);
+          if ('info' in data)
+            onSuccess(data.info.paymentId);
+
+          onSuccess(data.data);
+        }}
+        
+        subtotal={{cents: amount * 100}}
+        email={email}
+        webhookInfo={{ invoice, amount, email }}
+        loaderBackground={"#FFFFFF"}
+        handleHeightChange={handleHeightChange}
+        chargebackProtectionData={[
+          {
+            productName: "RPC Provider Subscription",
+            productType: "subscription",
+            quantity: Number(amount),
+          },
+        ]}
+      />
+    </div>
   );
 }
