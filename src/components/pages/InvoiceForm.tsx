@@ -1,7 +1,6 @@
 import { Input } from "../atoms/Input.tsx";
 import { ErrorType, useInvoiceContext } from "../../context/InvoiceContext.tsx";
 import { LegacyRef } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
 
 export function InvoiceForm() {
   const {
@@ -16,8 +15,6 @@ export function InvoiceForm() {
     form,
     successSignature,
   } = useInvoiceContext();
-
-  const { publicKey } = useWallet();
 
   return (
     <div className={"space-y-5 p-4"}>
@@ -81,12 +78,6 @@ export function InvoiceForm() {
           className={"hidden"}
           value={successSignature ?? ""}
           name={"signature"}
-        />
-
-        <input
-          className={"hidden"}
-          value={publicKey?.toString() ?? ""}
-          name={"wallet"}
         />
       </form>
     </div>

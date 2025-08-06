@@ -7,14 +7,13 @@ import {
   useMemo,
   useState,
 } from "react";
-import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { Connection, Keypair, PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
 
 export interface WalletContextProps {
   connected: boolean;
   publicKey: PublicKey | null;
   connection: Connection | null;
-  sendTransaction: (transaction: Transaction) => Promise<string>;
+  sendTransaction: <T extends Transaction | VersionedTransaction>(transaction: T) => Promise<string>;
 }
 
 const WalletContext = createContext<WalletContextProps>({
@@ -25,18 +24,11 @@ const WalletContext = createContext<WalletContextProps>({
 });
 
 export function WalletContextProvider({ children }: { children: ReactNode }) {
-  const wallet = useWallet();
   const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
 
   const [keypairLocalStorage, setKeypairLocalStorage] = useState<
     string | null
   >(null);
-
-  useEffect(() => {
-    if (wallet.publicKey) {
-      setPublicKey(wallet.publicKey);
-    }
-  }, [wallet]);
 
   useEffect(() => {
     if (keypairLocalStorage) return;
@@ -53,32 +45,30 @@ export function WalletContextProvider({ children }: { children: ReactNode }) {
   }, [keypairLocalStorage]);
 
   useEffect(() => {
-    if (!keypair || wallet.publicKey) return;
+    if (!keypair) return;
     if (publicKey?.equals(keypair.publicKey)) return;
     setPublicKey(keypair.publicKey);
-  }, [keypair, publicKey, wallet]);
+  }, [keypair, publicKey]);
 
   const connected = useMemo(() => !!publicKey, [publicKey]);
 
   const connection = useMemo(() => {
+    console.log("RPC URL", import.meta.env.VITE_RPC_URL);
     return new Connection(import.meta.env.VITE_RPC_URL, "confirmed");
   }, []);
 
   const sendTransaction = useCallback(
-    async (transaction: Transaction) => {
-      if (wallet.publicKey && wallet.signTransaction) {
-        const latestBlockHash =
-          await connection.getLatestBlockhash("confirmed");
-        transaction.recentBlockhash = latestBlockHash.blockhash;
-        await wallet.signTransaction(transaction);
-        return await wallet.sendTransaction(transaction, connection);
-      }
-
+    async <T extends Transaction | VersionedTransaction>(transaction: T) => {
       if (!keypair) throw new Error("Keypair not found");
-      transaction.partialSign(keypair);
+      if (transaction instanceof Transaction) {
+        transaction.partialSign(keypair);
+      } else if (transaction instanceof VersionedTransaction) {
+        transaction.sign([keypair]);
+      }
+      
       return await connection.sendRawTransaction(transaction.serialize());
     },
-    [connection, keypair, wallet],
+    [connection, keypair],
   );
 
   return (

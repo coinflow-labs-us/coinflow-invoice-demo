@@ -10,15 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@coinflowlabs/react": "^3.1.5",
+    "@coinflowlabs/react": "^5.2.3",
     "@headlessui/react": "^1.7.17",
     "@rollup/plugin-inject": "^5.0.5",
     "@solana/spl-memo": "^0.2.3",
     "@solana/spl-token": "0.3.8",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",
-    "@solana/wallet-adapter-react-ui": "^0.9.34",
-    "@solana/wallet-adapter-wallets": "^0.19.22",
     "@solana/web3.js": "1.78.0",
     "@types/react-router-dom": "^5.3.3",
     "boxicons": "^2.1.4",

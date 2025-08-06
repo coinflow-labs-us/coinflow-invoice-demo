@@ -1,7 +1,5 @@
 import "./App.css";
 import { BrandCover } from "./components/pages/BrandCover.tsx";
-import { WalletProvider } from "@solana/wallet-adapter-react";
-import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import {useLocalWallet, WalletContextProvider} from "./wallet/Wallet.tsx";
 import { Toaster } from "react-hot-toast";
 import {useQueryParam} from "./hooks/useQueryParam.ts";
@@ -11,19 +9,15 @@ import {useCoinflowEnv} from "./hooks/useCoinflowEnv.ts";
 
 function Subscribe() {
   return (
-    <WalletProvider wallets={[]} autoConnect>
-      <WalletModalProvider>
-        <WalletContextProvider>
-          <div className={"flex flex-1 h-screen w-screen relative"}>
-            <Toaster />
-            <div className={"grid grid-cols-1 md:grid-cols-2 h-full w-full"}>
-              <BrandCover subtext={'Subscribe to a Triton One Plan'}/>
-              <PaymentPage />
-            </div>
+      <WalletContextProvider>
+        <div className={"flex flex-1 h-screen w-screen relative"}>
+          <Toaster />
+          <div className={"grid grid-cols-1 md:grid-cols-2 h-full w-full"}>
+            <BrandCover subtext={'Subscribe to a Triton One Plan'}/>
+            <PaymentPage />
           </div>
-        </WalletContextProvider>
-      </WalletModalProvider>
-    </WalletProvider>
+        </div>
+      </WalletContextProvider>
   );
 }
 
