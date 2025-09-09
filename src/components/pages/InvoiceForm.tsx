@@ -29,7 +29,28 @@ export function InvoiceForm() {
           name="total"
           placeholder={"$10"}
           value={amount}
+          onBlur={() => {
+            if (!formError) {
+              setAmount(Number(amount).toFixed(2));
+            }
+          }}
+          onFocus={() => {
+            if (!formError) {
+              if (amount === '0.00') {
+                setAmount("")
+                return;
+              }
+              const index = amount.indexOf('.');
+              if (index !== -1 && amount.substring(index+1) === '00') {
+                setAmount(amount.substring(0, index));
+              }
+            }
+          }}
           onChange={(value) => {
+            const index = value.indexOf('.');
+            if (index !== -1 && value.length - index > 3) {
+              return;
+            }
             if (formError) setFormError(null);
             setAmount(value);
           }}
