@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useMemo, useState} from "react";
-import {CoinflowPurchase, PaymentMethods} from "@coinflowlabs/react";
+import {Cents, CoinflowPurchase, PaymentMethods} from "@coinflowlabs/react";
 import { useLocalWallet } from "../../wallet/Wallet.tsx";
 import SuccessModal from "../modals/SuccessModal.tsx";
 import { useInvoiceContext } from "../../context/InvoiceContext.tsx";
@@ -206,7 +206,7 @@ function CoinflowForm({
           onSuccess(data.data);
         }}
         
-        subtotal={{cents: amount * 100}}
+        subtotal={{cents: dollarsToCents(amount).cents}}
         email={email}
         webhookInfo={{ invoice, amount, email }}
         loaderBackground={"#FFFFFF"}
@@ -221,4 +221,21 @@ function CoinflowForm({
       />
     </div>
   );
+}
+
+function dollarsToCents(input: string | number): Cents {
+  if (typeof input === 'string') {
+    input = parseFloat(input);
+  }
+
+  if (isNaN(input) || input <= 0) return {cents: 0};
+
+  // Split the input into the dollar and cent parts
+  const [dollars, cents = '00'] = input.toString().split('.');
+
+  // Extract only the first two digits of the cents part
+  const normalizedCents = cents.substring(0, 2).padEnd(2, '0');
+
+  // Combine the dollars and normalized cents and convert to a number
+  return {cents: parseInt(dollars + normalizedCents)};
 }
