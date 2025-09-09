@@ -206,7 +206,7 @@ function CoinflowForm({
           onSuccess(data.data);
         }}
         
-        subtotal={{cents: dollarsToCents(amount).cents}}
+        subtotal={dollarsToCents(amount)}
         email={email}
         webhookInfo={{ invoice, amount, email }}
         loaderBackground={"#FFFFFF"}
